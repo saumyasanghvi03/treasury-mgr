@@ -1,0 +1,37 @@
+/* Minimal enterprise theme for Streamlit */
+:root {
+  --brand: #0e7490;
+  --brand-ink: #0b3b46;
+}
+
+.block-container {
+  padding-top: 1.6rem;
+  padding-bottom: 2rem;
+}
+
+h1, h2, h3, h4 {
+  letter-spacing: 0.2px;
+}
+
+.stMetric {
+  background: linear-gradient(135deg, rgba(14,116,144,0.08), rgba(14,116,144,0.02));
+  border: 1px solid rgba(14,116,144,0.15);
+  border-radius: 14px;
+  padding: 8px 12px;
+}
+
+.stButton>button, .stDownloadButton>button {
+  border-radius: 12px !important;
+  border: 1px solid rgba(14,116,144,0.25) !important;
+}
+
+.stButton>button:hover, .stDownloadButton>button:hover {
+  transform: translateY(-1px);
+  transition: all 0.12s ease-in-out;
+  box-shadow: 0 8px 16px rgba(14,116,144,0.15);
+}
+
+table {
+  border-radius: 12px;
+  overflow: hidden;
+}
