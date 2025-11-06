@@ -390,7 +390,7 @@ def calculate_var(returns_df, portfolio_df, confidence_level, time_horizon):
     mean_return = portfolio_returns.mean()
     std_return = portfolio_returns.std()
     z_score = stats.norm.ppf(1 - confidence_level/100)
-    parametric_var = abs((mean_return + z_score * std_return) * portfolio_value * np.sqrt(time_horizon))
+    parametric_var_dollar = abs((mean_return + z_score * std_return) * portfolio_value * np.sqrt(time_horizon))
     
     # 3. Monte Carlo VaR
     np.random.seed(42)
