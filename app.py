@@ -8,6 +8,30 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import TimeSeriesSplit
 from sklearn.metrics import mean_absolute_error
 from scipy.optimize import linprog
+import plotly.io as pio
+pio.renderers.default = "svg"   # faster
+
+@st.cache_data(show_spinner=False)
+def load_sample_data():
+    return make_sample_cash_txn(365)
+
+@st.cache_data(show_spinner=False)
+def preprocess_daily(df_raw):
+    return to_daily(df_raw)
+
+@st.cache_resource(show_spinner=False)
+def load_model_training(history):
+    train_df = lag_features(history)
+    X, y = train_df.drop(columns=["y"]), train_df["y"]
+    model = RandomForestRegressor(
+        n_estimators=120,        # reduced from 400 → 3x faster
+        max_depth=6,             # lighter model
+        random_state=13,
+        n_jobs=-1
+    )
+    model.fit(X, y)
+    return model
+
 
 # ----------------------------- #
 # Global Config & Styling Hook  #
@@ -232,7 +256,7 @@ uploaded_pay = st.sidebar.file_uploader("Upload Payments CSV (timestamp, amount,
 
 use_sample = st.sidebar.checkbox("Use Sample Data", value=True)
 if use_sample:
-    daily = make_sample_cash_txn(365)
+    daily = load_sample_data()
 else:
     if uploaded_txn is not None:
         df_raw = pd.read_csv(uploaded_txn)
@@ -267,7 +291,7 @@ if section == "Executive Dashboard":
     c1, c2 = st.columns([2,1])
     with c1:
         fig = px.line(daily, x="date", y=["inflow","outflow","net"], title="Daily Inflows / Outflows / Net")
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
     with c2:
         wf = build_waterfall(last30["inflow"].sum(), last30["outflow"].sum(), title="30-Day Waterfall")
         st.plotly_chart(wf, use_container_width=True)
@@ -306,7 +330,7 @@ elif section == "Cash Flow Forecast":
     fig.add_trace(go.Scatter(x=daily["date"], y=daily["net"], name="Historical Net"))
     fig.add_trace(go.Scatter(x=fc["date"], y=fc["forecast_net"], name="Forecast Net", mode="lines"))
     fig.update_layout(title="Net Cash Forecast")
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
     c1, c2 = st.columns(2)
     with c1:
@@ -354,7 +378,7 @@ elif section == "Basel III LCR":
         lcrs.append(lcr_s)
     fig = px.line(x=shocks, y=lcrs, markers=True, title="LCR vs. Outflow Shock (%)")
     fig.update_layout(xaxis_title="Outflow Shock (%)", yaxis_title="LCR (%)")
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
 # ----------------------------- #
 # ALM Gap Analysis              #
@@ -416,7 +440,7 @@ elif section == "Risk (VaR & Stress)":
     }
     stress_df = pd.DataFrame({"Scenario": shocks.keys(), "P&L (₹)": [notional*v for v in shocks.values()]})
     fig = px.bar(stress_df, x="Scenario", y="P&L (₹)", title="Instantaneous Shock P&L")
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
     st.dataframe(stress_df, use_container_width=True)
 
 # ----------------------------- #
@@ -430,7 +454,7 @@ elif section == "Intraday Liquidity":
         curve, peak = payments_intraday_metrics(dfp)
         fig = px.line(x=curve.index, y=curve.values, labels={"x":"Time", "y":"Cumulative Net (₹)"},
                       title="Intraday Cumulative Net Position (15-min)")
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
         st.metric("Peak Net Cumulative Outflow", f"₹{peak:,.0f}")
     else:
         st.info("Upload a Payments CSV with columns: timestamp, amount, direction (in/out).")
@@ -476,7 +500,7 @@ elif section == "Investment Optimizer":
             "Share (%)": (alloc.values/total)*100,
         })
         fig = px.pie(df_alloc, names="Instrument", values="Allocation (₹)", title="Optimal Allocation Mix")
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
         st.dataframe(df_alloc.style.format({"Allocation (₹)": "₹{:,.0f}", "Share (%)": "{:.2f}%"}), use_container_width=True)
         st.success(f"Expected Annual Yield: {np.dot([yields_dict[k] for k in instr], res.x)/total:.2%}")
     else:
