@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 import plotly.express as px
-from pulp import *
+from pulp import LpProblem, LpMaximize, LpMinimize, LpVariable, lpSum, PULP_CBC_CMD, LpStatus
 
 def show():
     st.header("💎 Investment Portfolio Optimizer")

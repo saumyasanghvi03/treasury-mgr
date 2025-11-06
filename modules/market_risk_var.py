@@ -307,6 +307,11 @@ def show():
     with tab2:
         st.write("Contribution of each asset to total portfolio VaR")
         
+        st.info("""
+        **Note:** Component VaR shown here uses a simplified proportional allocation method.
+        For production use, consider implementing marginal VaR which accounts for asset correlations.
+        """)
+        
         component_var = calculate_component_var(returns_df, portfolio_df, confidence_level)
         
         col1, col2 = st.columns([2, 1])
@@ -429,7 +434,14 @@ def calculate_cvar(portfolio_returns, portfolio_value, confidence_level):
     return expected_shortfall
 
 def calculate_component_var(returns_df, portfolio_df, confidence_level):
-    """Calculate component VaR for each asset"""
+    """
+    Calculate component VaR for each asset
+    
+    Note: This uses a simplified proportional allocation method based on portfolio weights.
+    For more accurate risk attribution, consider implementing marginal VaR which accounts
+    for correlations between assets. The current approach provides a reasonable approximation
+    for diversified portfolios but may not capture concentration risks.
+    """
     portfolio_returns = calculate_portfolio_returns(returns_df, portfolio_df)
     
     var_percentile = 100 - confidence_level
@@ -441,8 +453,10 @@ def calculate_component_var(returns_df, portfolio_df, confidence_level):
         asset = row['asset']
         weight = row['weight']
         
-        # Simplified component VaR calculation
-        # More sophisticated methods would use marginal VaR
+        # Simplified component VaR using proportional allocation
+        # This approximation assumes risk is proportional to weight
+        # More sophisticated approaches would calculate marginal VaR using:
+        # Component VaR = weight * (d(Portfolio VaR) / d(weight))
         component = total_var * weight
         
         component_vars.append({
