@@ -149,7 +149,7 @@ class MarketRiskAnalyzer:
         return results
     
     def monte_carlo_var(self, returns=None, portfolio_value=1_000_000, 
-                       num_simulations=10000, time_horizon=1):
+                       num_simulations=10000, time_horizon=1, random_seed=None):
         """
         Calculate Monte Carlo VaR through simulation.
         
@@ -160,6 +160,7 @@ class MarketRiskAnalyzer:
             portfolio_value (float): Current portfolio value
             num_simulations (int): Number of Monte Carlo simulations
             time_horizon (int): Time horizon in days
+            random_seed (int): Random seed for reproducibility (optional)
             
         Returns:
             dict: Monte Carlo VaR results with simulation details
@@ -176,7 +177,8 @@ class MarketRiskAnalyzer:
         std_return = returns_array.std()
         
         # Run Monte Carlo simulations
-        np.random.seed(42)
+        if random_seed is not None:
+            np.random.seed(random_seed)
         simulated_returns = np.random.normal(
             mean_return * time_horizon,
             std_return * np.sqrt(time_horizon),

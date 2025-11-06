@@ -18,6 +18,14 @@ class ALMGAPAnalyzer:
     across different time buckets to assess interest rate risk exposure.
     """
     
+    # Time bucket thresholds in days
+    BUCKET_30_DAYS = 30
+    BUCKET_90_DAYS = 90
+    BUCKET_180_DAYS = 180
+    BUCKET_365_DAYS = 365
+    BUCKET_3_YEARS = 1095
+    BUCKET_5_YEARS = 1825
+    
     def __init__(self):
         """Initialize the ALM GAP analyzer."""
         self.rsa_data = None
@@ -81,17 +89,17 @@ class ALMGAPAnalyzer:
         Returns:
             str: Time bucket label
         """
-        if days <= 30:
+        if days <= self.BUCKET_30_DAYS:
             return '0-30 days'
-        elif days <= 90:
+        elif days <= self.BUCKET_90_DAYS:
             return '31-90 days'
-        elif days <= 180:
+        elif days <= self.BUCKET_180_DAYS:
             return '91-180 days'
-        elif days <= 365:
+        elif days <= self.BUCKET_365_DAYS:
             return '181-365 days'
-        elif days <= 1095:  # 3 years
+        elif days <= self.BUCKET_3_YEARS:
             return '1-3 years'
-        elif days <= 1825:  # 5 years
+        elif days <= self.BUCKET_5_YEARS:
             return '3-5 years'
         else:
             return '5+ years'

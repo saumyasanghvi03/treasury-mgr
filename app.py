@@ -646,7 +646,7 @@ def show_market_risk():
         st.metric("Mean Return", f"{param_var['mean_return']*100:.3f}%")
     
     # Monte Carlo VaR
-    mc_var = analyzer.monte_carlo_var(returns, portfolio_value, num_simulations=10000)
+    mc_var = analyzer.monte_carlo_var(returns, portfolio_value, num_simulations=10000, random_seed=42)
     with col3:
         st.markdown("#### Monte Carlo VaR")
         st.metric("VaR (95%)", f"${mc_var['var_dollar']:,.0f}")
@@ -940,9 +940,11 @@ def show_portfolio_optimizer():
                         for k, v in result['allocations'].items()
                         if v['percentage'] > 0.001
                     ])
+                    # Sort once for reuse
+                    alloc_data_sorted = alloc_data.sort_values('Percentage', ascending=False)
                     
                     fig_alloc = px.pie(
-                        alloc_data,
+                        alloc_data_sorted,
                         values='Percentage',
                         names='Asset',
                         title='Portfolio Allocation'
@@ -952,7 +954,7 @@ def show_portfolio_optimizer():
                 with col2:
                     st.subheader("Allocation Details")
                     st.dataframe(
-                        alloc_data.sort_values('Percentage', ascending=False),
+                        alloc_data_sorted,
                         use_container_width=True
                     )
             
