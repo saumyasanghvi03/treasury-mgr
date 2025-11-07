@@ -364,4 +364,4 @@ else:
 # Footer
 # ----------------------------------
 st.markdown("---")
-st.caption("Ultra-Lite+ edition • Super fast • Boardroom-ready • Designed by Saumya Sanghvi")
+st.caption("Ultra-Lite+ edition • Super fast • Boardroom-ready • Designed by Saumya Sanghvi & Kanishk Mohan")
