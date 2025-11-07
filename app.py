@@ -52,13 +52,29 @@ def load_sample_daily(days: int = 365, seed: int = 42) -> pd.DataFrame:
     return df
 
 @st.cache_data(show_spinner=False)
+@st.cache_data(show_spinner=False)
 def load_transactions_csv(path_or_buf, nrows=None) -> pd.DataFrame:
     df = pd.read_csv(path_or_buf, parse_dates=["date"], nrows=nrows)
     df.columns = df.columns.str.lower().str.strip()
+
+    # Normalize amount column
     df["amount"] = pd.to_numeric(df["amount"], errors="coerce").fillna(0.0)
+
+    # Robust type column handling
     if "type" in df.columns:
-        df["type"] = df["type"].astype(str).lower().str.strip()
+        df["type"] = (
+            df["type"]
+            .astype(str)
+            .str.lower()
+            .str.strip()
+            .replace({"credit": "inflow", "debit": "outflow"})
+        )
+    else:
+        # If type column absent → infer using amount sign
+        df["type"] = np.where(df["amount"] >= 0, "inflow", "outflow")
+
     return df
+
 
 @st.cache_data(show_spinner=False)
 def aggregate_to_daily(df: pd.DataFrame) -> pd.DataFrame:
